@@ -1,0 +1,648 @@
+{
+  "version": 7,
+  "configurePresets": [
+    {
+      "name": "config-base",
+      "description": "Base configure preset.",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+        "CMAKE_C_STANDARD": "11",
+        "CMAKE_C_STANDARD_REQUIRED": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "config-base-windows",
+      "description": "Base configure preset for Windows.",
+      "inherits": "config-base",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS": "ON"
+      }
+    },
+    {
+      "name": "config-base-linux",
+      "description": "Base configure preset for Linux.",
+      "inherits": "config-base",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "CMAKE_POSITION_INDEPENDENT_CODE": "ON",
+        "CMAKE_C_FLAGS": "-Wall -Wextra -pedantic -pedantic-errors",
+        "CMAKE_CXX_FLAGS": "-Wall -Wextra -pedantic -pedantic-errors",
+        "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=mold"
+      }
+    },
+    {
+      "name": "config-base-darwin",
+      "description": "Base configure preset for Darwin.",
+      "inherits": "config-base",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      },
+      "cacheVariables": {
+        "CMAKE_POSITION_INDEPENDENT_CODE": "ON",
+        "CMAKE_C_FLAGS": "-Wall -Wextra -pedantic -pedantic-errors",
+        "CMAKE_CXX_FLAGS": "-Wall -Wextra -pedantic -pedantic-errors"
+      }
+    },
+    {
+      "name": "config-base-x64",
+      "description": "Base preset for x64 platforms.",
+      "hidden": true,
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "x64-windows-msvc",
+      "description": "Base preset for Windows development with MSVC.",
+      "inherits": [
+        "config-base-x64",
+        "config-base-windows"
+      ],
+      "hidden": true,
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ],
+          "intelliSenseMode": "windows-msvc-x64",
+          "enableMicrosoftCodeAnalysis": true
+        },
+        "jetbrains.com/clion": {
+          "toolchain": "Visual Studio"
+        }
+      },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "CMAKE_C_FLAGS_RELEASE": "/O2 /GL /Gw /Gy",
+        "CMAKE_CXX_FLAGS_RELEASE": "/O2 /GL /Gw /Gy",
+        "CMAKE_EXE_LINKER_FLAGS_RELEASE": "/LTCG /OPT:REF /OPT:ICF",
+        "CMAKE_SHARED_LINKER_FLAGS_RELEASE": "/LTCG /OPT:REF /OPT:ICF"
+      }
+    },
+    {
+      "name": "x64-windows-msvc-debug",
+      "displayName": "x64 Windows MSVC Debug",
+      "inherits": "x64-windows-msvc",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebugDLL"
+      }
+    },
+    {
+      "name": "x64-windows-msvc-release",
+      "displayName": "x64 Windows MSVC Release",
+      "inherits": "x64-windows-msvc",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL"
+      }
+    },
+    {
+      "name": "x64-windows-msvc-release-static",
+      "displayName": "x64 Windows MSVC Release (Static)",
+      "inherits": "x64-windows-msvc",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded"
+      }
+    },
+    {
+      "name": "x64-linux-gcc",
+      "description": "Base preset for Linux development with GCC.",
+      "inherits": [
+        "config-base-x64",
+        "config-base-linux"
+      ],
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_C_FLAGS_RELEASE": "-O2 -flto=thin -fwhole-program -ffunction-sections -fdata-sections",
+        "CMAKE_CXX_FLAGS_RELEASE": "-O2 -flto=thin -fwhole-program -ffunction-sections -fdata-sections",
+        "CMAKE_EXE_LINKER_FLAGS_RELEASE": "-flto=thin -fuse-ld=mold -Wl,--gc-sections, -Wl,--icf=safe, -Wl,--strip-all"
+      }
+    },
+    {
+      "name": "x64-linux-gcc-debug",
+      "displayName": "x64 Linux GCC Debug",
+      "inherits": "x64-linux-gcc",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "x64-linux-gcc-release",
+      "displayName": "x64 Linux GCC Release",
+      "inherits": "x64-linux-gcc",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc"
+      }
+    },
+    {
+      "name": "x64-linux-gcc-static-release",
+      "displayName": "x64 Linux GCC Static Release",
+      "inherits": "x64-linux-gcc",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_FLAGS_RELEASE": "-O2 -static -flto=thin -fwhole-program -ffunction-sections -fdata-sections",
+        "CMAKE_CXX_FLAGS_RELEASE": "-O2 -static -flto=thin -fwhole-program -ffunction-sections -fdata-sections",
+        "CMAKE_EXE_LINKER_FLAGS_RELEASE": "-flto=thin -fuse-ld=mold -Wl,--gc-sections, -Wl,--icf=safe, -Wl,--strip-all"
+      }
+    },
+    {
+      "name": "x64-linux-clang",
+      "description": "Base preset for Linux development with Clang.",
+      "inherits": [
+        "config-base-x64",
+        "config-base-linux"
+      ],
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_FLAGS_RELEASE": "-O2 -flto=thin -ffunction-sections -fdata-sections",
+        "CMAKE_CXX_FLAGS_RELEASE": "-O2 -flto=thin -ffunction-sections -fdata-sections",
+        "CMAKE_EXE_LINKER_FLAGS_RELEASE": "-flto=thin -fuse-ld=mold -Wl,--gc-sections, -Wl,--icf=safe, -Wl,--strip-all"
+      }
+    },
+    {
+      "name": "x64-linux-clang-debug",
+      "displayName": "x64 Linux Clang Debug",
+      "inherits": "x64-linux-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "x64-linux-clang-release",
+      "displayName": "x64 Linux Clang Release",
+      "inherits": "x64-linux-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "x64-linux-clang-static-release",
+      "displayName": "x64 Linux Clang Static Release",
+      "inherits": "x64-linux-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_FLAGS_RELEASE": "-O2 -static -flto=thin -ffunction-sections -fdata-sections",
+        "CMAKE_CXX_FLAGS_RELEASE": "-O2 -static -flto=thin -ffunction-sections -fdata-sections",
+        "CMAKE_EXE_LINKER_FLAGS_RELEASE": "-flto=thin -fuse-ld=mold -Wl,--gc-sections, -Wl,--icf=safe, -Wl,--strip-all"
+      }
+    },
+    {
+      "name": "x64-darwin-clang",
+      "description": "Base preset for Darwin development with Clang.",
+      "inherits": [
+        "config-base-x64",
+        "config-base-darwin"
+      ],
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_FLAGS_RELEASE": "-O2 -flto=thin",
+        "CMAKE_CXX_FLAGS_RELEASE": "-O2 -flto=thin",
+        "CMAKE_EXE_LINKER_FLAGS_RELEASE": "-flto=thin -Wl,--gc-sections",
+        "CMAKE_SHARED_LINKER_FLAGS_RELEASE": "-flto=thin -Wl,--gc-sections"
+      }
+    },
+    {
+      "name": "x64-darwin-clang-debug",
+      "displayName": "x64 Darwin Clang Debug",
+      "inherits": "x64-darwin-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "x64-darwin-clang-release",
+      "displayName": "x64 Darwin Clang Release",
+      "inherits": "x64-darwin-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "build-base-windows",
+      "description": "Base build preset for Windows.",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "x64-windows-msvc-debug",
+      "displayName": "x64 Windows MSVC Debug",
+      "description": "Builds the project with MSVC compilers in Debug mode.",
+      "configurePreset": "x64-windows-msvc-debug",
+      "inherits": "build-base-windows"
+    },
+    {
+      "name": "x64-windows-msvc-release",
+      "displayName": "x64 Windows MSVC Release",
+      "description": "Builds the project with MSVC compilers in Release mode.",
+      "configurePreset": "x64-windows-msvc-release",
+      "inherits": "build-base-windows"
+    },
+    {
+      "name": "x64-windows-msvc-release-static",
+      "displayName": "x64 Windows MSVC Release (Static)",
+      "description": "Builds the project with MSVC compilers in Release mode (static linking).",
+      "configurePreset": "x64-windows-msvc-release-static",
+      "inherits": "build-base-windows"
+    },
+    {
+      "name": "x64-linux-gcc-debug",
+      "displayName": "x64 Linux GCC Debug",
+      "description": "Builds the project with GCC compilers in Debug mode.",
+      "configurePreset": "x64-linux-gcc-debug"
+    },
+    {
+      "name": "x64-linux-gcc-release",
+      "displayName": "x64 Linux GCC Release",
+      "description": "Builds the project with GCC compilers in Release mode.",
+      "configurePreset": "x64-linux-gcc-release"
+    },
+    {
+      "name": "x64-linux-gcc-static-release",
+      "displayName": "x64 Linux GCC Static Release",
+      "description": "Builds the project with GCC compilers in Release mode (static linking).",
+      "configurePreset": "x64-linux-gcc-static-release"
+    },
+    {
+      "name": "x64-linux-clang-debug",
+      "displayName": "x64 Linux Clang Debug",
+      "description": "Builds the project with Clang compilers in Debug mode.",
+      "configurePreset": "x64-linux-clang-debug"
+    },
+    {
+      "name": "x64-linux-clang-release",
+      "displayName": "x64 Linux Clang Release",
+      "description": "Builds the project with Clang compilers in Release mode.",
+      "configurePreset": "x64-linux-clang-release"
+    },
+    {
+      "name": "x64-linux-clang-static-release",
+      "displayName": "x64 Linux Clang Static Release",
+      "description": "Builds the project with Clang compilers in Release mode (static linking).",
+      "configurePreset": "x64-linux-clang-static-release"
+    },
+    {
+      "name": "x64-darwin-clang-debug",
+      "displayName": "x64 Darwin Clang Debug",
+      "description": "Builds the project with Clang compilers in Debug mode.",
+      "configurePreset": "x64-darwin-clang-debug"
+    },
+    {
+      "name": "x64-darwin-clang-release",
+      "displayName": "x64 Darwin Clang Release",
+      "description": "Builds the project with Clang compilers in Release mode.",
+      "configurePreset": "x64-darwin-clang-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-base",
+      "description": "Base preset for running tests.",
+      "hidden": true,
+      "execution": {
+        "scheduleRandom": true,
+        "noTestsAction": "error"
+      },
+      "output": {
+        "outputOnFailure": true,
+        "shortProgress": true,
+        "outputJUnitFile": "${sourceDir}/out/test-results/${presetName}/test-results.xml",
+        "outputLogFile": "${sourceDir}/out/test-results/${presetName}/test-results.log"
+      }
+    },
+    {
+      "name": "linux-base",
+      "description": "Base preset for running tests on Linux.",
+      "inherits": "test-base",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "windows-base",
+      "description": "Base preset for running tests on Windows.",
+      "inherits": "test-base",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "darwin-base",
+      "description": "Base preset for running tests on Darwin.",
+      "inherits": "test-base",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "x64-windows-msvc-debug",
+      "displayName": "x64 Windows MSVC Debug",
+      "inherits": "windows-base",
+      "configurePreset": "x64-windows-msvc-debug"
+    },
+    {
+      "name": "x64-windows-msvc-release",
+      "displayName": "x64 Windows MSVC Release",
+      "inherits": "windows-base",
+      "configurePreset": "x64-windows-msvc-release"
+    },
+    {
+      "name": "x64-windows-msvc-release-static",
+      "displayName": "x64 Windows MSVC Release (Static)",
+      "inherits": "windows-base",
+      "configurePreset": "x64-windows-msvc-release-static"
+    },
+    {
+      "name": "x64-linux-gcc-debug",
+      "displayName": "x64 Linux GCC Debug",
+      "inherits": "linux-base",
+      "configurePreset": "x64-linux-gcc-debug"
+    },
+    {
+      "name": "x64-linux-gcc-release",
+      "displayName": "x64 Linux GCC Release",
+      "inherits": "linux-base",
+      "configurePreset": "x64-linux-gcc-release"
+    },
+    {
+      "name": "x64-linux-gcc-static-release",
+      "displayName": "x64 Linux GCC Static Release",
+      "inherits": "linux-base",
+      "configurePreset": "x64-linux-gcc-static-release"
+    },
+    {
+      "name": "x64-linux-clang-debug",
+      "displayName": "x64 Linux Clang Debug",
+      "inherits": "linux-base",
+      "configurePreset": "x64-linux-clang-debug"
+    },
+    {
+      "name": "x64-linux-clang-release",
+      "displayName": "x64 Linux Clang Release",
+      "inherits": "linux-base",
+      "configurePreset": "x64-linux-clang-release"
+    },
+    {
+      "name": "x64-linux-clang-static-release",
+      "displayName": "x64 Linux Clang Static Release",
+      "inherits": "linux-base",
+      "configurePreset": "x64-linux-clang-static-release"
+    },
+    {
+      "name": "x64-darwin-clang-debug",
+      "displayName": "x64 Darwin Clang Debug",
+      "inherits": "darwin-base",
+      "configurePreset": "x64-darwin-clang-debug"
+    },
+    {
+      "name": "x64-darwin-clang-release",
+      "displayName": "x64 Darwin Clang Release",
+      "inherits": "darwin-base",
+      "configurePreset": "x64-darwin-clang-release"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "x64-windows-msvc-debug",
+      "displayName": "x64 Windows MSVC Debug",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-windows-msvc-debug"
+        },
+        {
+          "type": "build",
+          "name": "x64-windows-msvc-debug"
+        },
+        {
+          "type": "test",
+          "name": "x64-windows-msvc-debug"
+        }
+      ]
+    },
+    {
+      "name": "x64-windows-msvc-release",
+      "displayName": "x64 Windows MSVC Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-windows-msvc-release"
+        },
+        {
+          "type": "build",
+          "name": "x64-windows-msvc-release"
+        },
+        {
+          "type": "test",
+          "name": "x64-windows-msvc-release"
+        }
+      ]
+    },
+    {
+      "name": "x64-windows-msvc-release-static",
+      "displayName": "x64 Windows MSVC Release (Static)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-windows-msvc-release-static"
+        },
+        {
+          "type": "build",
+          "name": "x64-windows-msvc-release-static"
+        },
+        {
+          "type": "test",
+          "name": "x64-windows-msvc-release-static"
+        }
+      ]
+    },
+    {
+      "name": "x64-linux-gcc-debug",
+      "displayName": "x64 Linux GCC Debug",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-linux-gcc-debug"
+        },
+        {
+          "type": "build",
+          "name": "x64-linux-gcc-debug"
+        },
+        {
+          "type": "test",
+          "name": "x64-linux-gcc-debug"
+        }
+      ]
+    },
+    {
+      "name": "x64-linux-gcc-release",
+      "displayName": "x64 Linux GCC Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-linux-gcc-release"
+        },
+        {
+          "type": "build",
+          "name": "x64-linux-gcc-release"
+        },
+        {
+          "type": "test",
+          "name": "x64-linux-gcc-release"
+        }
+      ]
+    },
+    {
+      "name": "x64-linux-gcc-static-release",
+      "displayName": "x64 Linux GCC Static Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-linux-gcc-static-release"
+        },
+        {
+          "type": "build",
+          "name": "x64-linux-gcc-static-release"
+        },
+        {
+          "type": "test",
+          "name": "x64-linux-gcc-static-release"
+        }
+      ]
+    },
+    {
+      "name": "x64-linux-clang-debug",
+      "displayName": "x64 Linux Clang Debug",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-linux-clang-debug"
+        },
+        {
+          "type": "build",
+          "name": "x64-linux-clang-debug"
+        },
+        {
+          "type": "test",
+          "name": "x64-linux-clang-debug"
+        }
+      ]
+    },
+    {
+      "name": "x64-linux-clang-release",
+      "displayName": "x64 Linux Clang Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-linux-clang-release"
+        },
+        {
+          "type": "build",
+          "name": "x64-linux-clang-release"
+        },
+        {
+          "type": "test",
+          "name": "x64-linux-clang-release"
+        }
+      ]
+    },
+    {
+      "name": "x64-linux-clang-static-release",
+      "displayName": "x64 Linux Clang Static Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-linux-clang-static-release"
+        },
+        {
+          "type": "build",
+          "name": "x64-linux-clang-static-release"
+        },
+        {
+          "type": "test",
+          "name": "x64-linux-clang-static-release"
+        }
+      ]
+    },
+    {
+      "name": "x64-darwin-clang-debug",
+      "displayName": "x64 Darwin Clang Debug",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-darwin-clang-debug"
+        },
+        {
+          "type": "build",
+          "name": "x64-darwin-clang-debug"
+        },
+        {
+          "type": "test",
+          "name": "x64-darwin-clang-debug"
+        }
+      ]
+    },
+    {
+      "name": "x64-darwin-clang-release",
+      "displayName": "x64 Darwin Clang Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "x64-darwin-clang-release"
+        },
+        {
+          "type": "build",
+          "name": "x64-darwin-clang-release"
+        },
+        {
+          "type": "test",
+          "name": "x64-darwin-clang-release"
+        }
+      ]
+    }
+  ]
+}
