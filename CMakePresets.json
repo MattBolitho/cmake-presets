@@ -185,6 +185,8 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_FLAGS": "-ftime-trace=time-trace.json",
+        "CMAKE_CXX_FLAGS": "-ftime-trace=time-trace.json",
         "CMAKE_C_FLAGS_RELEASE": "-O2 -flto=thin -ffunction-sections -fdata-sections",
         "CMAKE_CXX_FLAGS_RELEASE": "-O2 -flto=thin -ffunction-sections -fdata-sections",
         "CMAKE_EXE_LINKER_FLAGS_RELEASE": "-flto=thin -fuse-ld=mold -Wl,--gc-sections, -Wl,--icf=safe, -Wl,--strip-all"
